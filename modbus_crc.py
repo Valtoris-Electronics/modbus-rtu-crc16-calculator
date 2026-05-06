@@ -1,37 +1,39 @@
-#include <stdio.h>
-#include <stdint.h>
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
-/**
- * @brief Calculates Modbus RTU CRC-16
- * @param buf Pointer to the byte array
- * @param len Length of the byte array
- * @return 16-bit CRC value
- */
-uint16_t ModRTU_CRC(uint8_t buf[], int len) {
-    uint16_t crc = 0xFFFF;
-    for (int pos = 0; pos < len; pos++) {
-        crc ^= (uint16_t)buf[pos];    // XOR byte into least sig. byte of crc
-        for (int i = 8; i != 0; i--) { // Loop over each bit
-            if ((crc & 0x0001) != 0) { // If the LSB is set
-                crc >>= 1;             // Shift right and XOR 0xA001
-                crc ^= 0xA001;
-            } else {                   // Else LSB is not set
-                crc >>= 1;             // Just shift right
-            }
-        }
-    }
-    return crc;
-}
+"""
+Modbus RTU CRC-16 Calculator
+A lightweight script for calculating Modbus RTU CRC-16 checksums.
+Perfect for debugging RS485 frames on the fly.
+"""
 
-int main() {
-    // Example Frame: 01 03 00 00 00 02
-    uint8_t test_frame[] = {0x01, 0x03, 0x00, 0x00, 0x00, 0x02};
-    int length = sizeof(test_frame) / sizeof(test_frame[0]);
+def calculate_modbus_crc16(data_hex_string: str) -> str:
+    """
+    Calculates the Modbus RTU CRC-16 for a given hex string.
+    """
+    # Clean up the input string (remove spaces)
+    hex_str = data_hex_string.replace(" ", "")
+    data_bytes = bytes.fromhex(hex_str)
     
-    uint16_t crc_res = ModRTU_CRC(test_frame, length);
+    crc = 0xFFFF
+    for byte in data_bytes:
+        crc ^= byte
+        for _ in range(8):
+            if crc & 0x0001:
+                crc >>= 1
+                crc ^= 0xA001
+            else:
+                crc >>= 1
+                
+    # Swap bytes for Modbus little-endian format
+    crc_bytes = crc.to_bytes(2, byteorder='little')
+    return crc_bytes.hex().upper()
+
+if __name__ == "__main__":
+    # Example: Read Holding Registers (Node 01, Func 03, Addr 0000, 2 Regs)
+    test_frame = "01 03 00 00 00 02"
+    crc_result = calculate_modbus_crc16(test_frame)
     
-    // Print in little-endian format (Low Byte first, then High Byte)
-    printf("CRC-16 Result: %02X %02X\n", crc_res & 0xFF, crc_res >> 8);
-    
-    return 0;
-}
+    print(f"Original Frame: {test_frame}")
+    print(f"CRC-16 Result : {crc_result[:2]} {crc_result[2:]}")
+    print(f"Full Frame    : {test_frame} {crc_result[:2]} {crc_result[2:]}")
