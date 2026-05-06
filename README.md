@@ -17,7 +17,7 @@ Easily integrate the ModRTU_CRC() function into your microcontroller (STM32, ESP
 🚀 The Web-based GUI (For Field Testing)
 This repo contains the core logic. However, if you are currently on-site, covered in grease, and need a quick way to verify frames on your phone without firing up an IDE or running Python scripts, we hosted a visual version of this calculator here:
 
-👉 Free Modbus CRC & RS485 Signal Analyzer
+👉 [Free Modbus CRC & RS485 Signal Analyzer](https://valtoris.com/modbus-rtu-crc-16-calculator-hex-checksum-debugging-tool/)
 
 The web version uses the exact same math but also includes:
 
